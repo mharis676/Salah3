@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Salah Tracker</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #121212;
+            color: #e0e0e0;
+            text-align: center;
+            margin: 20px;
+        }
+
+        table {
+            width: 100%;
+            max-width: 400px;
+            margin: auto;
+            border-collapse: collapse;
+            background: #1e1e1e;
+            border-radius: 8px;
+            padding: 10px;
+        }
+
+        th, td {
+            padding: 10px;
+            border-bottom: 1px solid #333;
+        }
+
+        button {
+            padding: 5px 10px;
+            border: none;
+            border-radius: 4px;
+            background-color: #28a745;
+            color: white;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #218838;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Total Missed Salah</h1>
+    <table>
+        <tr><th>Salah</th><th>Count</th><th>Actions</th></tr>
+        <tr><td>Fajr</td><td id="fajr">Loading...</td><td>
+            <button onclick="updateSalah('fajr', 1)">+</button>
+            <button onclick="updateSalah('fajr', -1)">-</button>
+        </td></tr>
+        <tr><td>Dhuhr</td><td id="dhuhr">Loading...</td><td>
+            <button onclick="updateSalah('dhuhr', 1)">+</button>
+            <button onclick="updateSalah('dhuhr', -1)">-</button>
+        </td></tr>
+        <tr><td>Asr</td><td id="asr">Loading...</td><td>
+            <button onclick="updateSalah('asr', 1)">+</button>
+            <button onclick="updateSalah('asr', -1)">-</button>
+        </td></tr>
+        <tr><td>Maghrib</td><td id="maghrib">Loading...</td><td>
+            <button onclick="updateSalah('maghrib', 1)">+</button>
+            <button onclick="updateSalah('maghrib', -1)">-</button>
+        </td></tr>
+        <tr><td>Isha</td><td id="isha">Loading...</td><td>
+            <button onclick="updateSalah('isha', 1)">+</button>
+            <button onclick="updateSalah('isha', -1)">-</button>
+        </td></tr>
+        <tr><td>Witr</td><td id="witr">Loading...</td><td>
+            <button onclick="updateSalah('witr', 1)">+</button>
+            <button onclick="updateSalah('witr', -1)">-</button>
+        </td></tr>
+    </table>
+
+    <script>
+        const githubUsername = "YOUR_USERNAME";
+        const repoName = "salah-tracker";
+        const filePath = "salahData.json";
+        const rawUrl = `https://raw.githubusercontent.com/${githubUsername}/${repoName}/main/${filePath}`;
+        const apiUrl = `https://api.github.com/repos/${githubUsername}/${repoName}/contents/${filePath}`;
+        const token = "YOUR_GITHUB_PERSONAL_ACCESS_TOKEN"; // Replace with your GitHub token
+
+        let salahData = {};
+
+        async function fetchData() {
+            try {
+                const response = await fetch(rawUrl);
+                salahData = await response.json();
+                for (const salah in salahData) {
+                    document.getElementById(salah).textContent = salahData[salah];
+                }
+            } catch (error) {
+                console.error("Error fetching data:", error);
+            }
+        }
+
+        async function updateSalah(salah, change) {
+            if (!salahData[salah]) return;
+
+            salahData[salah] += change;
+            document.getElementById(salah).textContent = salahData[salah];
+
+            const content = btoa(JSON.stringify(salahData, null, 2)); // Convert to Base64
+            const getSha = await fetch(apiUrl, { headers: { Authorization: `token ${token}` } });
+            const sha = (await getSha.json()).sha;
+
+            const updateResponse = await fetch(apiUrl, {
+                method: "PUT",
+                headers: {
+                    Authorization: `token ${token}`,
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    message: "Updated Salah count",
+                    content: content,
+                    sha: sha
+                })
+            });
+
+            if (updateResponse.ok) {
+                console.log("Salah data updated successfully!");
+            } else {
+                console.error("Error updating Salah data:", await updateResponse.text());
+            }
+        }
+
+        fetchData();
+    </script>
+</body>
+</html>

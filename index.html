@@ -77,8 +77,8 @@
         const githubUsername = "YOUR_USERNAME";
         const repoName = "salah-tracker";
         const filePath = "salahData.json";
-        const rawUrl = `https://raw.githubusercontent.com/${githubUsername}/${repoName}/main/${filePath}`;
-        const apiUrl = `https://api.github.com/repos/${githubUsername}/${repoName}/contents/${filePath}`;
+        const rawUrl = `https://raw.githubusercontent.com/mharis676/Salah3/main/salahData.json?nocache=${new Date().getTime()}`;
+        const apiUrl = `https://api.github.com/repos/mharis676/Salah3/contents/salahData.json`;
         const token = "YOUR_GITHUB_PERSONAL_ACCESS_TOKEN"; // Replace with your GitHub token
 
         let salahData = {};
